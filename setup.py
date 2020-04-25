@@ -5,7 +5,7 @@ setup(
     version='0.0.1',
     description='utils for pytorch training',
     url='git@github.com:carloalbertobarbano/pytorch-train-utils.git',
-    author='Carlo Alberto Barbano'
+    author='Carlo Alberto Barbano',
     author_email='carlo.alberto.barbano@outlook.com',
     license='unlicense',
     packages=['pytorch-train-utils'],
