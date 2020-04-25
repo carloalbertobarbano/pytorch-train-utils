@@ -23,11 +23,12 @@ def set_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.manual_seed(seed)
 
-def get_mean_and_std(dataloader):
+def get_mean_and_std(dataloader, device=torch.device('cpu')):
     num_samples = 0.
     mean = 0.
     std = 0.
     for batch, _ in tqdm(dataloader):
+        batch = batch.to(device)
         batch_size = batch.size(0)
         batch = batch.view(batch_size, batch.size(1), -1)
         mean += batch.mean(2).sum(0)
@@ -37,7 +38,7 @@ def get_mean_and_std(dataloader):
     mean /= num_samples
     std /= num_samples
 
-    return mean, std
+    return mean.cpu(), std.cpu()
 
 def save_cm(cm, title, path, normalized=False,
             format="d", xticklabels='auto', yticklabels='auto',
