@@ -1,9 +1,9 @@
 import torch
 import torch.nn.functional as F
 import torchvision
-import trainer
-import metrics
-import utils
+from pytorchtrainutils import trainer
+from pytorchtrainutils import metrics
+from pytorchtrainutils import utils
 
 device = torch.device('cpu')
 utils.set_seed(42)
