@@ -2,7 +2,7 @@
 
 ## Install
 
-```
+```bash
 pip3 install git+git://github.com/carloalbertobarbano/pytorch-train-utils
 ```
 
