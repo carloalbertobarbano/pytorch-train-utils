@@ -4,9 +4,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-sns.set()
-import utils
 from tqdm import tqdm
+
+from . import utils
 
 def summarize_metrics(metrics):
     summarizable = dict(filter(lambda m: m[1].summarizable if hasattr(m[1], 'summarizable') else True, metrics.items()))
@@ -99,7 +99,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         weight={'train': None, 'val': None, 'test': None},
         metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, callbacks=None):
     utils.ensure_dir(name)
-    
+
     best_metric = 0.
     best_model = None
 
