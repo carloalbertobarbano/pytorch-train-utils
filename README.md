@@ -31,8 +31,9 @@ best_model = trainer.fit(
     callbacks={'train': lambda: utils.save_cm(
         cm=tracked_metrics[-1], title='train', path=f'{name}/cm-train.png',
         normalized=True, format=".1f", vmin=0., vmax=1.,
-        yticklabels=['a']*10
-    )})
+        yticklabels=['a']*10)
+    }
+)
 
 test_logs = trainer.test(
     best_model, test_dataloader=test_loader,
