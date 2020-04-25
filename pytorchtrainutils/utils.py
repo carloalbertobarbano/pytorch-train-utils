@@ -27,7 +27,7 @@ def get_mean_and_std(dataloader):
     num_samples = 0.
     mean = 0.
     std = 0.
-    for batch, _, _ in tqdm(dataloader):
+    for batch, _ in tqdm(dataloader):
         batch_size = batch.size(0)
         batch = batch.view(batch_size, batch.size(1), -1)
         mean += batch.mean(2).sum(0)
