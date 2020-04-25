@@ -149,7 +149,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
                 os.path.join(f'{name}/best.pt')
             )
 
-        if (epoch+1) % test_every == 0:
+        if test_dataloader is not None and (epoch+1) % test_every == 0:
             test_logs = test(
                 model=model, test_dataloader=test_dataloader,
                 criterion=criterion, metrics=metrics,
