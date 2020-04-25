@@ -9,5 +9,15 @@ setup(
     author_email='carlo.alberto.barbano@outlook.com',
     license='unlicense',
     packages=['pytorchtrainutils'],
-    zip_safe=False
+    zip_safe=False,
+    install_requires=[
+        'torch',
+        'torchvision',
+        'numpy',
+        'sklearn',
+        'matplotlib',
+        'seaborn',
+        'pandas',
+        'tqdm'
+    ]
 )
