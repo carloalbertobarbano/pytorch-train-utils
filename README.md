@@ -15,6 +15,11 @@ from pytorchtrainutils import utils
 
 . . .
 
+utils.set_seed(42)
+mean, std = utils.get_mean_and_std(train_loader)
+
+. . .
+
 tracked_metrics = [
     metrics.Accuracy(multiclass=True),
     metrics.FScore(multiclass=True),
