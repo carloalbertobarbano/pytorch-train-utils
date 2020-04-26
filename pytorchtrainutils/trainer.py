@@ -27,7 +27,9 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
     for metric in metrics:
         metric.reset()
 
-    for data, labels in tqdm(dataloader, desc=phase, leave=False):
+    pbar = tqdm(len(dataloader), desc=phase, leave=False)
+
+    for data, labels in dataloader:
         data, labels = data.to(device), labels.to(device)
 
         running_loss = 0.
@@ -57,6 +59,8 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
 
         loss += running_loss.item()
         num_batches += 1
+        pbar.update()
+    pbar.close()
 
     logs = { metric.__name__: copy.deepcopy(metric) for metric in metrics }
     logs.update({'loss': loss / num_batches})
