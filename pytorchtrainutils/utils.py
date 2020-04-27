@@ -5,7 +5,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+import tqdm.notebook as tqdmn
 from tqdm import tqdm
+
+
+def in_ipynb():
+    try:
+        cfg = get_ipython().config
+        return True
+    except Exception as e:
+        return False
+
+if in_ipynb():
+    tqdm = tqdmn.tqdm
+
 from pathlib import Path
 
 def ensure_dir(dirname):
@@ -27,16 +40,13 @@ def get_mean_and_std(dataloader, device=torch.device('cpu')):
     num_samples = 0.
     mean = 0.
     std = 0.
-    pbar = tqdm(len(dataloader))
-    for batch, _ in dataloader:
+    for batch, _ in tqdm(dataloader):
         batch = batch.to(device)
         batch_size = batch.size(0)
         batch = batch.view(batch_size, batch.size(1), -1)
         mean += batch.mean(2).sum(0)
         std += batch.std(2).sum(0)
         num_samples += batch_size
-        pbar.update()
-    pbar.close()
 
     mean /= num_samples
     std /= num_samples

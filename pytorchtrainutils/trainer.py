@@ -4,7 +4,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import tqdm.notebook as tqdmn
 from tqdm import tqdm
+
+def in_ipynb():
+    try:
+        cfg = get_ipython().config
+        return True
+    except Exception as e:
+        return False
+
+if in_ipynb():
+    tqdm = tqdmn.tqdm
 
 from . import utils
 
@@ -27,9 +38,8 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
     for metric in metrics:
         metric.reset()
 
-    pbar = tqdm(len(dataloader), desc=phase, leave=False)
 
-    for data, labels in dataloader:
+    for data, labels in tqdm(dataloader, desc=phase, leave=False):
         data, labels = data.to(device), labels.to(device)
 
         running_loss = 0.
@@ -59,8 +69,6 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
 
         loss += running_loss.item()
         num_batches += 1
-        pbar.update()
-    pbar.close()
 
     logs = { metric.__name__: copy.deepcopy(metric) for metric in metrics }
     logs.update({'loss': loss / num_batches})
@@ -170,6 +178,8 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
 
         plot_losses(train_losses, val_losses, test_losses, name, os.path.join(path, f'{name}/loss.png'))
 
+    print('Training finished')
+    
     return best_model
 
 

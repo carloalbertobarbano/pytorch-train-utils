@@ -67,8 +67,8 @@ class FScore(Metric):
         if self.multiclass:
             _, outputs = torch.max(self.outputs, 1)
             return f1_score(self.targets.numpy(), outputs.numpy(), average='weighted')
-        self.outputs = (self.outputs > threshold).long()
-        return f1_score(self.targets.numpy(), self.outputs.numpy())
+        outputs = (self.outputs > threshold).long()
+        return f1_score(self.targets.numpy(), outputs.numpy())
 
 
 class ConfusionMatrix(Metric):
