@@ -26,7 +26,7 @@ def summarize_metrics(metrics):
 def report_metrics(metrics, end='\n'):
     print(summarize_metrics(metrics), end=end, flush=True)
 
-def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None):
+def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False):
     num_batches = 0.
     loss = 0.
 
@@ -46,7 +46,14 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
         output = None
 
         with torch.set_grad_enabled(phase == 'train'):
-            output = model(data)
+            if tta:
+                batch_size, n_crops, c, h, w = data.size()
+                data = data.view(-1, c, h, w)
+                output = model(data)
+                output = output.view(batch_size, n_crops, -1).mean(1)
+            else:
+                output = model(data)
+
             running_loss = criterion(output, labels, weight=weight)
 
         if phase == 'train':
@@ -179,15 +186,16 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         plot_losses(train_losses, val_losses, test_losses, name, os.path.join(path, f'{name}/loss.png'))
 
     print('Training finished')
-    
+
     return best_model
 
 
-def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.device('cuda:0')):
+def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.device('cuda:0'), tta=False):
     test_logs = run(
         model=model, dataloader=test_dataloader,
         criterion=criterion, weight=weight, optimizer=None,
-        metrics=metrics, phase='test', device = device
+        metrics=metrics, phase='test', device=device,
+        tta=tta
     )
 
     print('TEST | ', end='')
