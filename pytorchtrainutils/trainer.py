@@ -54,6 +54,9 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
             else:
                 output = model(data)
 
+            for metric in metrics:
+                metric.accumulate(output.clone(), labels.clone())
+
             running_loss = criterion(output, labels, weight=weight)
 
         if phase == 'train':
@@ -70,9 +73,6 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
             else:
                 for opt in optimizer:
                     opt.step()
-
-        for metric in metrics:
-            metric.accumulate(output.clone(), labels.clone())
 
         loss += running_loss.item()
         num_batches += 1
