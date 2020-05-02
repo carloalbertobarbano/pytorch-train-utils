@@ -72,7 +72,7 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
                     opt.step()
 
         for metric in metrics:
-            metric.accumulate(output, labels)
+            metric.accumulate(output.copy(), labels.copy())
 
         loss += running_loss.item()
         num_batches += 1
