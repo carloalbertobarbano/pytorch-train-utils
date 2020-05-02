@@ -116,7 +116,8 @@ def plot_losses(train, val, test, name, path):
 def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
         weight={'train': None, 'val': None, 'test': None},
-        metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, callbacks=None):
+        metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, 
+        callbacks={'train': None, 'val': None, 'test':None}):
     utils.ensure_dir(name)
 
     best_metric = 0.
