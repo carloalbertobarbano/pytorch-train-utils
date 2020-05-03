@@ -77,6 +77,17 @@ class MultilabelAccuracy(Metric):
         accuracy = np.array(accuracy)
         return accuracy.mean()
     
+    def get_best_threshold(self, class_idx):
+        outputs = torch.sigmoid(self.outputs)
+        targets = self.targets
+
+        class_outputs = outputs[:, class_idx]
+        class_targets = targets[:, class_idx]
+
+        fpr, tpr, thresholds = roc_curve(class_targets.numpy(), class_outputs.numpy())
+        best_idx = np.argmax(tpr-fpr)
+        return thresholds[best_idx]
+
     def get_class_preds(self, class_idx, threshold=0.5):
         outputs = torch.sigmoid(self.outputs)
         outputs = (outputs > torch.tensor(threshold)).long()
