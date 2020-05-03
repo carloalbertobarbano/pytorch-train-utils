@@ -106,14 +106,22 @@ def is_better(a, b, mode='min'):
     return False
 
 def plot_losses(train, val, test, name, path):
-    df = pd.DataFrame({'train': train, 'val': val, 'test': test})
-    ax = sns.lineplot(data=df)
-    ax.set_title(name)
-    hm = ax.get_figure()
-    hm.savefig(path)
-    plt.show()
-    hm.clf()
+    plt.plot(train, label='train')
+    plt.plot(val, label='val')
+    plt.plot(test, label='test')
+    plt.legend()
+    plt.title(name)
+    plt.savefig(path)
+    plt.clf()
     plt.cla()
+    #df = pd.DataFrame({'train': train, 'val': val, 'test': test})
+    #ax = sns.lineplot(data=df)
+    #ax.set_title(name)
+    #hm = ax.get_figure()
+    #hm.savefig(path)
+    #plt.show()
+    #hm.clf()
+    #plt.cla()
 
 def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
