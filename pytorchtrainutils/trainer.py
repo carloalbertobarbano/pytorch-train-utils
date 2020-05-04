@@ -111,7 +111,6 @@ def plot_losses(train, val, test, name, path):
     ax.set_title(name)
     hm = ax.get_figure()
     hm.savefig(path)
-    plt.show()
     hm.clf()
 
 def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
