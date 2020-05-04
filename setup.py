@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pytorch-train-utils',
-    version='0.0.1',
+    version='0.0.2',
     description='utils for pytorch training',
     url='git@github.com:carloalbertobarbano/pytorch-train-utils.git',
     author='Carlo Alberto Barbano',
