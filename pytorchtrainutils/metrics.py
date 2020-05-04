@@ -35,10 +35,10 @@ class Metric:
 class MultilabelMetric(Metric):
     def __init__(self, apply_sigmoid=True):
         super().__init__(multiclass=False)
-        self.sigmoid = apply_sigmoid
+        self.apply_sigmoid = apply_sigmoid
     
     def sigmoid(self, x):
-        return torch.sigmoid(x) if self.sigmoid else x
+        return torch.sigmoid(x) if self.apply_sigmoid else x
 
     def get_class_preds(self, class_idx):
         outputs = self.sigmoid(self.outputs)
