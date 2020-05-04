@@ -188,7 +188,7 @@ class MultilabelConfusionMatrix(MultilabelMetric):
     __name__ = 'cm'
 
     def __init__(self):
-        super().__init__(multiclass=False)
+        super().__init__(apply_sigmoid=False)
         self.summarizable = False
 
     def get(self, normalized=False):
