@@ -154,7 +154,10 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         report_metrics(train_logs, end=' |\n')
 
         if scheduler is not None:
-            scheduler.step(val_logs['loss'])
+            if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step(val_logs['loss'])
+            else:
+                scheduler.step()
 
         torch.save(
             make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
