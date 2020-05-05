@@ -72,10 +72,21 @@ class Accuracy(Metric):
         return thresholds[best_idx]
 
 class MultilabelAccuracy(MultilabelMetric):
-    __name__ = 'acc'
+    __name__ = 'avg-ba'
+
+    def __init__(self, metric='avg-ba', apply_sigmoid=True):
+        super().__init__(apply_sigmoid=apply_sigmoid)
+
+        self.metrics = {
+            'top1': self.top1_accuracy,
+            'avg-accuracy': self.avg_accuracy,
+            'avg-ba': self.avg_ba
+        }
+
+        self.__name__ = metric
     
     def get(self):
-        return self.top1_accuracy()
+        return self.metrics[self.__name__]
     
     def top1_accuracy(self):
         outputs = self.outputs
@@ -102,7 +113,7 @@ class MultilabelAccuracy(MultilabelMetric):
         
         return class_acuracy
     
-    def avg_ba(self, class_idx, threshold=[0.5]):
+    def avg_ba(self, threshold=[0.5]):
         if len(threshold) == 1:
             threshold = np.broadcast_to(threshold, self.targets.size(1))
         
