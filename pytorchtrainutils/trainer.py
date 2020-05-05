@@ -83,7 +83,7 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
 
 def make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params=None):
     checkpoint = {
-        'epoch': epoch, 'model': model.state_dict(), 'metrics': metrics
+        'epoch': epoch, 'model': model.state_dict()
     }
 
     if isinstance(optimizer, torch.optim.Optimizer):
