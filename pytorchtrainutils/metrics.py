@@ -78,8 +78,8 @@ class MultilabelAccuracy(MultilabelMetric):
         super().__init__(apply_sigmoid=apply_sigmoid)
 
         self.metrics = {
-            'top1': self.top1_accuracy,
-            'avg-accuracy': self.avg_accuracy,
+            'top1-acc': self.top1_accuracy,
+            'avg-acc': self.avg_accuracy,
             'avg-ba': self.avg_ba
         }
 
