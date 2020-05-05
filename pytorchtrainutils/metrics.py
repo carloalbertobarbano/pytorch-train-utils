@@ -86,7 +86,7 @@ class MultilabelAccuracy(MultilabelMetric):
         self.__name__ = metric
     
     def get(self):
-        return self.metrics[self.__name__]
+        return self.metrics[self.__name__]()
     
     def top1_accuracy(self):
         outputs = self.outputs
