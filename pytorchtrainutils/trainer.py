@@ -125,6 +125,7 @@ def plot_metrics(df, path):
     df.drop(['loss'], axis=1).plot()
     plt.savefig(path)
     plt.clf()
+    plt.cla()
 
 def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
