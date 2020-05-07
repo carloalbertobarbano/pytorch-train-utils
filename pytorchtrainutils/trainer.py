@@ -26,6 +26,16 @@ def summarize_metrics(metrics):
 def report_metrics(metrics, end='\n'):
     print(summarize_metrics(metrics), end=end, flush=True)
 
+def save_metrics(metrics, path):
+    summarizable = dict(filter(lambda m: m[1].summarizable if hasattr(m[1], 'summarizable') else True, metrics.items()))
+    df2 = pd.DataFrame(summarizable)
+    df1 = pd.DataFrame()
+    try:
+        df1 = pd.read_csv(path)
+    except:
+        pass
+    pd.concat((df1, df2)).to_csv(path)
+
 def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False):
     num_batches = 0.
     loss = 0.
@@ -151,7 +161,9 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
 
         print(f'Epoch: {epoch:03d} | VAL ', end='')
         report_metrics(val_logs, end=' | TRAIN ')
+        save_metrics(val_logs, path=f'{name}/metrics-val.csv')
         report_metrics(train_logs, end=' |\n')
+        save_metrics(train_logs, path=f'{name}/metrics-train.csv')
 
         if scheduler is not None:
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
