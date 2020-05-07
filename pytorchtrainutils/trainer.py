@@ -28,7 +28,7 @@ def report_metrics(metrics, end='\n'):
 
 def save_metrics(metrics, path):
     summarizable = dict(filter(lambda m: m[1].summarizable if hasattr(m[1], 'summarizable') else True, metrics.items()))
-    df2 = pd.DataFrame(summarizable)
+    df2 = pd.DataFrame(summarizable.items())
     df1 = pd.DataFrame()
     try:
         df1 = pd.read_csv(path)
