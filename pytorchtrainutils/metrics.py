@@ -85,7 +85,7 @@ class Accuracy(Metric):
         else:
             _, outputs = torch.max(outputs, 1)
 
-        balanced_accuracy_score(self.targets.numpy(), outputs.numpy())
+        return balanced_accuracy_score(self.targets.numpy(), outputs.numpy())
 
     def get_best_threshold(self):
         fpr, tpr, thresholds = roc_curve(self.targets.numpy(), self.outputs.numpy())
