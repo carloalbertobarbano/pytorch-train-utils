@@ -120,7 +120,9 @@ def plot_losses(train, val, test, name, path):
     hm = ax.get_figure()
     hm.savefig(path)
     hm.clf()
-
+    plt.cla()
+    plt.clf()
+    
 def plot_metrics(df, path):
     df.drop(['loss'], axis=1).plot()
     plt.savefig(path)
