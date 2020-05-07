@@ -28,10 +28,11 @@ def report_metrics(metrics, end='\n'):
 
 def update_df(df, epoch, metrics):
     summarizable = dict(filter(lambda m: m[1].summarizable if hasattr(m[1], 'summarizable') else True, metrics.items()))
+    summarizable = {k: float(str(v)) for k,v in summarizable.items()}
     summarizable.update({'epoch': epoch})
-    
+
     df2 = pd.DataFrame([summarizable]).set_index('epoch')
-    return pd.concat((df, df2))
+    return pd.concat((df, df2)).apply(pd.to_numeric, errors='ignore')
 
 def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False):
     num_batches = 0.
@@ -120,6 +121,11 @@ def plot_losses(train, val, test, name, path):
     hm.savefig(path)
     hm.clf()
 
+def plot_metrics(df, path):
+    df.drop(['loss'], axis=1).plot()
+    plt.savefig(path)
+    plt.clf()
+
 def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
         weight={'train': None, 'val': None, 'test': None},
@@ -165,9 +171,11 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
 
         df_train = update_df(df_train, epoch, train_logs)
         df_valid = update_df(df_valid, epoch, val_logs)
-    
         df_train.to_csv(f'{name}/metrics-train.csv')
         df_valid.to_csv(f'{name}/metrics-val.csv')
+
+        plot_metrics(df_train, f'{name}/metrics-train.png')
+        plot_metrics(df_valid, f'{name}/metrics-val.png')
 
         if scheduler is not None:
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
