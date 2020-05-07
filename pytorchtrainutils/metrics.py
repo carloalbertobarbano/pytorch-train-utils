@@ -67,7 +67,7 @@ class Accuracy(Metric):
         self.__name__ = metric
 
     def get(self, threshold=0.5):
-        return self.metrics[__name__]()
+        return self.metrics[self.__name__]()
 
     def accuracy(self, threshold=0.5):
         outputs = self.outputs
