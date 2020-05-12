@@ -57,7 +57,19 @@ class MultilabelMetric(Metric):
 class Accuracy(Metric):
     __name__ = 'acc'
 
+    def __init__(self, metric='acc', multiclass=False):
+        super().__init__(multiclass=multiclass)
+        self.metrics = {
+            'acc': self.accuracy,
+            'ba': self.ba,
+        }
+
+        self.__name__ = metric
+
     def get(self, threshold=0.5):
+        return self.metrics[self.__name__]()
+
+    def accuracy(self, threshold=0.5):
         outputs = self.outputs
         if not self.multiclass:
             outputs = (outputs > threshold).long()
@@ -65,6 +77,15 @@ class Accuracy(Metric):
             _, outputs = torch.max(outputs, 1)
 
         return accuracy_score(self.targets.numpy(), outputs.numpy())
+    
+    def ba(self, threshold=0.5):
+        outputs = self.outputs
+        if not self.multiclass:
+            outputs = (outputs > threshold).long()
+        else:
+            _, outputs = torch.max(outputs, 1)
+
+        return balanced_accuracy_score(self.targets.numpy(), outputs.numpy())
 
     def get_best_threshold(self):
         fpr, tpr, thresholds = roc_curve(self.targets.numpy(), self.outputs.numpy())
