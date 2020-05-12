@@ -10,14 +10,14 @@ setup(
     license='unlicense',
     packages=['pytorchtrainutils'],
     zip_safe=False,
-    install_requires=[
-        'torch',
-        'torchvision',
-        'numpy',
-        'sklearn',
-        'matplotlib',
-        'seaborn',
-        'pandas',
-        'tqdm'
-    ]
+    #install_requires=[
+    #    'torch',
+    #    'torchvision',
+    #    'numpy',
+    #    'sklearn',
+    #    'matplotlib',
+    #    'seaborn',
+    #    'pandas',
+    #    'tqdm'
+    #]
 )
