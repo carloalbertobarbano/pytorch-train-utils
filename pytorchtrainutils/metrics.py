@@ -93,6 +93,12 @@ class MultilabelAccuracy(MultilabelMetric):
         _, outputs = torch.max(outputs, 1)
         _, targets = torch.max(self.targets, 1)
         return accuracy_score(targets, outputs.numpy())
+    
+    def top1_ba(self):
+        outputs = self.outputs
+        _, outputs = torch.max(outputs, 1)
+        _, targets = torch.max(self.targets, 1)
+        return balanced_accuracy_score(targets.numpy().astype('uint8'), outputs.numpy())
         
     def class_accuracy(self, class_idx, threshold=0.5):
         class_outputs, class_targets = self.get_thresholded_preds(class_idx, threshold)
