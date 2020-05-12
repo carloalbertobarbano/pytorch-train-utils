@@ -34,7 +34,7 @@ def update_df(df, epoch, metrics):
     df2 = pd.DataFrame([summarizable]).set_index('epoch')
     return pd.concat((df, df2)).apply(pd.to_numeric, errors='ignore')
 
-def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False):
+def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False, silence=False):
     num_batches = 0.
     loss = 0.
 
@@ -46,8 +46,11 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
     for metric in metrics:
         metric.reset()
 
-
-    for data, labels in tqdm(dataloader, desc=phase, leave=False):
+    itr = iter(dataloader)
+    if not silence:
+        itr = iter(tqdm(dataloader, desc=phase, leave=False))
+        
+    for data, labels in itr:
         data, labels = data.to(device), labels.to(device)
 
         running_loss = 0.
@@ -133,7 +136,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
         weight={'train': None, 'val': None, 'test': None},
         metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, 
-        callbacks={'train': None, 'val': None, 'test':None}):
+        callbacks={'train': None, 'val': None, 'test':None}, silence=False):
     utils.ensure_dir(name)
 
     best_metric = 0.
@@ -153,7 +156,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         train_logs = run(
             model=model, dataloader=train_dataloader,
             criterion=criterion, weight=weight['train'], optimizer=optimizer,
-            metrics=metrics, phase='train', device=device
+            metrics=metrics, phase='train', device=device, silence=silence
         )
 
         if 'train' in callbacks and callbacks['train'] is not None:
@@ -162,66 +165,71 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         val_logs = run(
             model=model, dataloader=val_dataloader,
             criterion=criterion, weight=weight['val'], optimizer=None,
-            metrics=metrics, phase='val', device=device
+            metrics=metrics, phase='val', device=device, silence=silence
         )
 
         if 'val' in callbacks and callbacks['val'] is not None:
             callbacks['val']()
 
-        print(f'Epoch: {epoch:03d} | VAL ', end='')
-        report_metrics(val_logs, end=' | TRAIN ')
-        report_metrics(train_logs, end=' |\n')
+        if not silence:
+            print(f'Epoch: {epoch:03d} | VAL ', end='')
+            report_metrics(val_logs, end=' | TRAIN ')
+            report_metrics(train_logs, end=' |\n')
 
-        df_train = update_df(df_train, epoch, train_logs)
-        df_valid = update_df(df_valid, epoch, val_logs)
-        df_train.to_csv(f'{name}/metrics-train.csv')
-        df_valid.to_csv(f'{name}/metrics-val.csv')
+            df_train = update_df(df_train, epoch, train_logs)
+            df_valid = update_df(df_valid, epoch, val_logs)
+            df_train.to_csv(f'{name}/metrics-train.csv')
+            df_valid.to_csv(f'{name}/metrics-val.csv')
 
-        plot_metrics(df_train, f'{name}/metrics-train.png')
-        plot_metrics(df_valid, f'{name}/metrics-val.png')
+            plot_metrics(df_train, f'{name}/metrics-train.png')
+            plot_metrics(df_valid, f'{name}/metrics-val.png')
+
+            torch.save(
+                make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
+                os.path.join(path, f'{name}/final.pt')
+            )
 
         if scheduler is not None:
             if isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 scheduler.step(val_logs['loss'])
             else:
                 scheduler.step()
-
-        torch.save(
-            make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
-            os.path.join(path, f'{name}/final.pt')
-        )
-
+           
         if best_model is None or is_better(float(str(val_logs[metric_choice])), best_metric, mode):
             best_metric = float(str(val_logs[metric_choice]))
             best_model = copy.deepcopy(model)
-            torch.save(
-                make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
-                os.path.join(f'{name}/best.pt')
-            )
+            if not silence:
+                torch.save(
+                    make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
+                    os.path.join(f'{name}/best.pt')
+                )
 
         if test_dataloader is not None and (epoch+1) % test_every == 0:
             test_logs = test(
                 model=model, test_dataloader=test_dataloader,
                 criterion=criterion, metrics=metrics,
                 device=device,
-                weight=weight['test']
+                weight=weight['test'],
+                silence=silence
             )
 
             if 'test' in callbacks and callbacks['test'] is not None:
                 callbacks['test']()
 
-        train_losses.append(train_logs['loss'])
-        val_losses.append(val_logs['loss'])
-        test_losses.append(test_logs['loss'])
+        if not silence:
+            train_losses.append(train_logs['loss'])
+            val_losses.append(val_logs['loss'])
+            test_losses.append(test_logs['loss'])
 
-        plot_losses(train_losses, val_losses, test_losses, name, os.path.join(path, f'{name}/loss.png'))
+            plot_losses(train_losses, val_losses, test_losses, name, os.path.join(path, f'{name}/loss.png'))
 
-    print('Training finished')
+    if not silence:
+        print('Training finished')
 
     return best_model
 
 
-def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.device('cuda:0'), tta=False):
+def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.device('cuda:0'), tta=False, silence=False):
     test_logs = run(
         model=model, dataloader=test_dataloader,
         criterion=criterion, weight=weight, optimizer=None,
@@ -229,6 +237,7 @@ def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.d
         tta=tta
     )
 
-    print('TEST | ', end='')
-    report_metrics(test_logs)
+    if not silence:
+        print('TEST | ', end='')
+        report_metrics(test_logs)
     return test_logs
