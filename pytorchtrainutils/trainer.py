@@ -180,8 +180,8 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
             df_train.to_csv(f'{name}/metrics-train.csv')
             df_valid.to_csv(f'{name}/metrics-val.csv')
 
-            plot_metrics(df_train, f'{name}/metrics-train.png')
-            plot_metrics(df_valid, f'{name}/metrics-val.png')
+            plot_metrics(df_train, f'{name}/metrics-train.png', name)
+            plot_metrics(df_valid, f'{name}/metrics-val.png', name)
 
             torch.save(
                 make_checkpoint(epoch, model, optimizer, metrics, checkpoint_params),
