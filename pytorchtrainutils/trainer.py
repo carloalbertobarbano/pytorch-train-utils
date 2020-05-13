@@ -34,7 +34,9 @@ def update_df(df, epoch, metrics):
     df2 = pd.DataFrame([summarizable]).set_index('epoch')
     return pd.concat((df, df2)).apply(pd.to_numeric, errors='ignore')
 
-def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.device('cuda:0'), weight=None, tta=False, silence=False):
+def run(model, dataloader, criterion, optimizer, metrics, phase, 
+        device=torch.device('cuda:0'), weight=None, tta=False, silence=False,
+        accumulation_steps=1):
     num_batches = 0.
     loss = 0.
 
@@ -50,7 +52,7 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
     if not silence:
         itr = iter(tqdm(dataloader, desc=phase, leave=False))
         
-    for data, labels in itr:
+    for step, (data, labels) in enumerate(itr):
         data, labels = data.to(device), labels.to(device)
 
         running_loss = 0.
@@ -71,19 +73,20 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
             running_loss = criterion(output, labels, weight=weight)
 
         if phase == 'train':
-            if isinstance(optimizer, torch.optim.Optimizer):
-                optimizer.zero_grad()
-            else:
-                for opt in optimizer:
-                    opt.zero_grad()
-
             running_loss.backward()
 
-            if isinstance(optimizer, torch.optim.Optimizer):
-                optimizer.step()
-            else:
-                for opt in optimizer:
-                    opt.step()
+            if (step + 1) % accumulation_steps == 0:
+                if isinstance(optimizer, torch.optim.Optimizer):
+                    optimizer.step()
+                else:
+                    for opt in optimizer:
+                        opt.step()
+
+                if isinstance(optimizer, torch.optim.Optimizer):
+                    optimizer.zero_grad()
+                else:
+                    for opt in optimizer:
+                        opt.zero_grad()
 
         loss += running_loss.item()
         num_batches += 1
@@ -135,7 +138,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
         weight={'train': None, 'val': None, 'test': None},
         metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, 
-        callbacks={'train': None, 'val': None, 'test':None}, silence=False):
+        callbacks={'train': None, 'val': None, 'test':None}, silence=False, accumulation_steps=1):
     utils.ensure_dir(name)
 
     best_metric = 0.
@@ -155,7 +158,8 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         train_logs = run(
             model=model, dataloader=train_dataloader,
             criterion=criterion, weight=weight['train'], optimizer=optimizer,
-            metrics=metrics, phase='train', device=device, silence=silence
+            metrics=metrics, phase='train', device=device, silence=silence, 
+            accumulation_steps=accumulation_steps
         )
 
         if 'train' in callbacks and callbacks['train'] is not None:
