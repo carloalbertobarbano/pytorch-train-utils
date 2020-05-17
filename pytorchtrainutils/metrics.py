@@ -8,7 +8,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import precision_recall_curve
-from sklearn.metrics import average_precision_score
+from sklearn.metrics import precision_score, average_precision_score
 
 class Metric:
     def __init__(self, multiclass=False):
@@ -196,7 +196,14 @@ class MultilabelRocAuc(MultilabelMetric):
 class Precision(Metric):
     __name__ = 'precision'
 
-    def get(self):
+    def get(self, threshold=0.5):
+        return self.precision(threshold=threshold)
+    
+    def precision(self, threshold):
+        outputs = (self.outputs > threshold).long()
+        return precision_score(self.targets.numpy(), outputs.numpy())
+
+    def avg_precision(self):
         return average_precision_score(self.targets.numpy(), self.outputs.numpy())
 
     def get_curve(self):
