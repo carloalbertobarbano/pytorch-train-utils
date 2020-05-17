@@ -196,7 +196,7 @@ class MultilabelRocAuc(MultilabelMetric):
 class Precision(Metric):
     __name__ = 'precision'
 
-     def get(self):
+    def get(self):
         return average_precision_score(self.targets.numpy(), self.outputs.numpy())
 
     def get_curve(self):
