@@ -46,7 +46,9 @@ def run(model, dataloader, criterion, optimizer, metrics, phase, device=torch.de
     for metric in metrics:
         metric.reset()
 
-    itr = iter(dataloader)
+    itr = None
+    if silence:
+        itr = iter(dataloader)
     if not silence:
         itr = iter(tqdm(dataloader, desc=phase, leave=False))
         
