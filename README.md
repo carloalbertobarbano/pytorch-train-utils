@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/carloalbertobarbano/pytorch-train-utils.svg?branch=master)](https://travis-ci.com/carloalbertobarbano/pytorch-train-utils)
+
 # pytorch-train-utils
 
 ## Install
