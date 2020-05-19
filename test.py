@@ -70,6 +70,6 @@ test_logs = trainer.test(
     device=device
 )
 
-np.testing.assert_almost_equal(test_logs['loss'], 2.3044819037119546, decimal=16)
-np.testing.assert_almost_equal(test_logs['f-score'].get(), 0.05757575757575758, decimal=16)
-np.testing.assert_almost_equal(test_logs['acc'].get(), 0.06666666666666667, decimal=16)
+np.testing.assert_almost_equal(test_logs['loss'], 2.3044819037119546, decimal=5)
+np.testing.assert_almost_equal(test_logs['f-score'].get(), 0.05757575757575758, decimal=5)
+np.testing.assert_almost_equal(test_logs['acc'].get(), 0.06666666666666667, decimal=5)
