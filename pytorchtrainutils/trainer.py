@@ -89,7 +89,9 @@ def run(model, dataloader, criterion, optimizer, metrics, phase,
                         opt.zero_grad()
 
         loss += running_loss.item()
-        num_batches += 1
+        
+        if (step + 1) % accumulation_steps == 0:
+            num_batches += 1
 
     logs = { metric.__name__: copy.deepcopy(metric) for metric in metrics }
     logs.update({'loss': loss / num_batches})
