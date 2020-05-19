@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 import torchvision
+import numpy as np
 from pytorchtrainutils import trainer
 from pytorchtrainutils import metrics
 from pytorchtrainutils import utils
@@ -64,7 +65,11 @@ best_model = trainer.fit(
     )})
 
 test_logs = trainer.test(
-    best_model, test_dataloader=test_loader,
+    model, test_dataloader=test_loader,
     criterion=criterion, metrics=tracked_metrics,
     device=device
 )
+
+np.testing.assert_almost_equal(test_logs['loss'], 2.3044819037119546, decimal=16)
+np.testing.assert_almost_equal(test_logs['f-score'].get(), 0.05757575757575758, decimal=16)
+np.testing.assert_almost_equal(test_logs['acc'].get(), 0.06666666666666667, decimal=16)
