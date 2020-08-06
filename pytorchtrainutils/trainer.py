@@ -36,7 +36,7 @@ def update_df(df, epoch, metrics):
 
 def run(model, dataloader, criterion, optimizer, metrics, phase, 
         device=torch.device('cuda:0'), weight=None, tta=False, silence=False,
-        accumulation_steps=1):
+        accumulation_steps=1, label_offset=-1):
     num_batches = 0.
     loss = 0.
 
@@ -70,7 +70,10 @@ def run(model, dataloader, criterion, optimizer, metrics, phase,
                 output = model(data)
 
             for metric in metrics:
-                metric.accumulate(output.clone(), labels.clone())
+                if label_offset == -1:
+                    metric.accumulate(output.clone(), labels.clone())
+                else:
+                    metric.accumulate(output.clone(), labels[:, label_offset].clone())
 
             running_loss = criterion(output, labels, weight=weight)
 
@@ -142,7 +145,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         criterion, optimizer, scheduler, metrics, n_epochs, name, path='',
         weight={'train': None, 'val': None, 'test': None},
         metric_choice='loss', mode='min', device=torch.device('cuda:0'), checkpoint_params=None, 
-        callbacks={'train': None, 'val': None, 'test':None}, silence=False, accumulation_steps=1):
+        callbacks={'train': None, 'val': None, 'test':None}, silence=False, accumulation_steps=1, label_offset=-1):
     utils.ensure_dir(name)
 
     best_metric = 0.
@@ -163,7 +166,7 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
             model=model, dataloader=train_dataloader,
             criterion=criterion, weight=weight['train'], optimizer=optimizer,
             metrics=metrics, phase='train', device=device, silence=silence, 
-            accumulation_steps=accumulation_steps
+            accumulation_steps=accumulation_steps, label_offset=label_offset
         )
 
         if 'train' in callbacks and callbacks['train'] is not None:
@@ -172,7 +175,8 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
         val_logs = run(
             model=model, dataloader=val_dataloader,
             criterion=criterion, weight=weight['val'], optimizer=None,
-            metrics=metrics, phase='val', device=device, silence=silence
+            metrics=metrics, phase='val', device=device, silence=silence,
+            label_offset=label_offset
         )
 
         if 'val' in callbacks and callbacks['val'] is not None:
@@ -217,7 +221,8 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
                 criterion=criterion, metrics=metrics,
                 device=device,
                 weight=weight['test'],
-                silence=silence
+                silence=silence,
+                label_offset=label_offset
             )
 
             if 'test' in callbacks and callbacks['test'] is not None:
@@ -236,12 +241,14 @@ def fit(model, train_dataloader, val_dataloader, test_dataloader, test_every,
     return best_model
 
 
-def test(model, test_dataloader, criterion, metrics, weight=None, device=torch.device('cuda:0'), tta=False, silence=False):
+def test(model, test_dataloader, criterion, metrics, 
+        weight=None, device=torch.device('cuda:0'), 
+        tta=False, silence=False, label_offset=-1):
     test_logs = run(
         model=model, dataloader=test_dataloader,
         criterion=criterion, weight=weight, optimizer=None,
         metrics=metrics, phase='test', device=device,
-        tta=tta
+        tta=tta, label_offset=label_offset
     )
 
     if not silence:
